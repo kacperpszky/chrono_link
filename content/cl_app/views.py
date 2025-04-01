@@ -1,7 +1,7 @@
-# core/views.py
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login, logout
+from .models import Project
 
 def register(request):
     if request.method == 'POST':
@@ -28,3 +28,22 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return redirect('home')
+
+
+def home(request):
+    projects = Project.objects.all()
+    return render(request, 'cl_app/home.html', {'projects': projects})
+
+
+def project_detail(request, pk):
+    project = get_object_or_404(Project, pk=pk)
+    return render(request, 'cl_app/project_detail.html', {'project': project})
+
+
+def add_project(request):
+    if request.method == 'POST':
+        title = request.POST['title']
+        description = request.POST['description']
+        project = Project.objects.create(title=title, description=description, created_by=request.user)
+        return redirect('project_detail', pk=project.pk)
+    return render(request, 'cl_app/add_project.html')
